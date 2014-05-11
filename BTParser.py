@@ -58,16 +58,13 @@ class BTParser():
             print 'list found' # DEBUG
             return self.decodeList(index)
 
+        # DICT
+        elif self.data[index] == self.DICT_START:
+            print 'dictionary found' # DEBUG
+            return self.decodeDict(index)
 
-        # elif d == self.DICT_START:
-        #     print 'dictionary found' # DEBUG
-        #
-        #
-        #     while data[index] != self.END_CHAR:
         else:
-            return (index + 1)    # DEBUG
-
-
+            raise ValueError  # DEBUG NEED TO FIX
 
 
     def decodeInt(self, index):
@@ -153,22 +150,43 @@ class BTParser():
         print 'new_list', # DEBUG
         print new_list  # DEBUG
         print 'return_index', # DEBUG
-        print index # DEBUG
+        print (index + 1) # DEBUG
         print 'exit_decodeList()'   # DEBUG
 
         return (index + 1), new_list
 
     def decodeDict(self, index):
         """
+        index: the index of DICT_START
 
+        returns the index after END_CHAR, new_dict
         """
-        return True
+        print 'decodeDict():', # DEBUG
+        print index # DEBUG
+
+        new_dict = {}
+
+        index += 1
+
+        while self.data[index] != self.END_CHAR:
+
+            index, new_key = self.decode(index)
+            index, new_value = self.decode(index)
+            new_dict[new_key] = new_value
+
+        print 'new_dict', # DEBUG
+        print new_dict  # DEBUG
+        print 'return_index', # DEBUG
+        print (index + 1) # DEBUG
+        print 'exit_decodeDict()'   # DEBUG
+
+        return (index + 1), new_dict
 
 
 
 if __name__ == '__main__':
 
-    torrent_data = open("safe", "rb").read()
+    torrent_data = open("l5.torrent", "rb").read()
 
     parser = BTParser(torrent_data)
 

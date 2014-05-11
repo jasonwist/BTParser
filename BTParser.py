@@ -1,5 +1,5 @@
 import string # needed for finding numbers in the string
-
+import time # needed for epoch to human time
 
 class BTParser():
     """
@@ -22,8 +22,6 @@ class BTParser():
         self.torrent_data = torrent
 
 
-
-
     def parseTorrent(self):
         """
 
@@ -32,6 +30,7 @@ class BTParser():
         self.data = self.torrent_data
 
         self.parsed_data = []
+        torrent_info = {}
 
         index = 0
 
@@ -39,28 +38,33 @@ class BTParser():
             index, new_data = self.decode(index)
             self.parsed_data.append(new_data)
 
-        return self.parsed_data
+        torrent_info['Created on'] = self.getCreationDate()
+        # torrent_info['Torrent Client'] = self.getCreationClient()
+        torrent_info['Tracker URL'] = self.getTrackerURL()
+        # torrent_info['Files in Torrent'] = self.getFiles()
+
+        return torrent_info
 
 
     def decode(self, index):
         # INT
         if self.data[index] == self.INT_START:
-            print 'int found' # DEBUG
+            # print 'int found' # DEBUG
             return self.decodeInt(index)
 
         # STRING
         elif self.data[index] in self.STR_START:
-            print 'string found' # DEBUG
+            # print 'string found' # DEBUG
             return self.decodeString(index)
 
         # LIST
         elif self.data[index] == self.LIST_START:
-            print 'list found' # DEBUG
+            # print 'list found' # DEBUG
             return self.decodeList(index)
 
         # DICT
         elif self.data[index] == self.DICT_START:
-            print 'dictionary found' # DEBUG
+            # print 'dictionary found' # DEBUG
             return self.decodeDict(index)
 
         else:
@@ -73,8 +77,8 @@ class BTParser():
 
         returns the index after END_CHAR, new_int
         """
-        print 'decodeInt():', # DEBUG
-        print index # DEBUG
+        # print 'decodeInt():', # DEBUG
+        # print index # DEBUG
 
         int_start = index+1
 
@@ -85,11 +89,11 @@ class BTParser():
 
         new_int = self.data[int_start:int_end]
 
-        print 'new_int', # DEBUG
-        print new_int   # DEBUG
-        print 'return_index',    # DEBUG
-        print (index + 1) # DEBUG
-        print 'exit_decodeInt()'    #DBUG
+        # print 'new_int', # DEBUG
+        # print new_int   # DEBUG
+        # print 'return_index',    # DEBUG
+        # print (index + 1) # DEBUG
+        # print 'exit_decodeInt()'    #DBUG
 
         return (index + 1), new_int
 
@@ -101,8 +105,8 @@ class BTParser():
         returns the index after the last string char, new_str
         """
 
-        print 'decodeString():', # DEBUG
-        print index # DEBUG
+        # print 'decodeString():', # DEBUG
+        # print index # DEBUG
 
         length_in_str = ''
         new_str = ''
@@ -120,13 +124,14 @@ class BTParser():
             new_str += self.data[index]
             index += 1
 
-        print 'new_str', # DEBUG
-        print new_str   # DEBUG
-        print 'return_index', # DEBUG
-        print index # DEBUG
-        print 'exit_decodeString()' # DEBUG
+        # print 'new_str', # DEBUG
+        # print new_str   # DEBUG
+        # print 'return_index', # DEBUG
+        # print index # DEBUG
+        # print 'exit_decodeString()' # DEBUG
 
         return index, new_str
+
 
     def decodeList(self, index):
         """
@@ -135,8 +140,8 @@ class BTParser():
         returns the index after END_CHAR, new_list
         """
 
-        print 'decodeList():', # DEBUG
-        print index # DEBUG
+        # print 'decodeList():', # DEBUG
+        # print index # DEBUG
 
         new_list = []
 
@@ -147,13 +152,14 @@ class BTParser():
             index, new_item = self.decode(index)
             new_list.append(new_item)
 
-        print 'new_list', # DEBUG
-        print new_list  # DEBUG
-        print 'return_index', # DEBUG
-        print (index + 1) # DEBUG
-        print 'exit_decodeList()'   # DEBUG
+        # print 'new_list', # DEBUG
+        # print new_list  # DEBUG
+        # print 'return_index', # DEBUG
+        # print (index + 1) # DEBUG
+        # print 'exit_decodeList()'   # DEBUG
 
         return (index + 1), new_list
+
 
     def decodeDict(self, index):
         """
@@ -161,8 +167,8 @@ class BTParser():
 
         returns the index after END_CHAR, new_dict
         """
-        print 'decodeDict():', # DEBUG
-        print index # DEBUG
+        # print 'decodeDict():', # DEBUG
+        # print index # DEBUG
 
         new_dict = {}
 
@@ -174,19 +180,39 @@ class BTParser():
             index, new_value = self.decode(index)
             new_dict[new_key] = new_value
 
-        print 'new_dict', # DEBUG
-        print new_dict  # DEBUG
-        print 'return_index', # DEBUG
-        print (index + 1) # DEBUG
-        print 'exit_decodeDict()'   # DEBUG
+        # print 'new_dict', # DEBUG
+        # print new_dict  # DEBUG
+        # print 'return_index', # DEBUG
+        # print (index + 1) # DEBUG
+        # print 'exit_decodeDict()'   # DEBUG
 
         return (index + 1), new_dict
+
+
+    def getCreationDate(self):
+        creation_date_epoch = self.parsed_data[0].get('creation date', 'Not available')
+
+        if creation_date_epoch != 'Not available':
+            return time.strftime("%a, %b %d %Y %H:%M:%S", time.gmtime(int(creation_date_epoch))) + ' GMT'
+        else:
+            return creation_date_epoch
+
+
+    def getTrackerURL(self):
+        return self.parsed_data[0].get('announce', 'Not available')
+
+
+    def getCreationClient(self):
+        return
+
+    def getFiles(self):
+        return
 
 
 
 if __name__ == '__main__':
 
-    torrent_data = open("l5.torrent", "rb").read()
+    torrent_data = open("l5.torrent", "r").read()
 
     parser = BTParser(torrent_data)
 

@@ -156,7 +156,7 @@ class BTParser():
         print index # DEBUG
         print 'exit_decodeList()'   # DEBUG
 
-        return index, new_list
+        return (index + 1), new_list
 
     def decodeDict(self, index):
         """

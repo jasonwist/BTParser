@@ -31,47 +31,53 @@ class BTParser():
 
         self.data = self.torrent_data
 
-        self.parsed_data = {}
+        self.parsed_data = []
 
         index = 0
 
-        while index in range(len(self.data)):
-
-            # INT
-            if self.data[index] == self.INT_START:
-                print 'int found' # DEBUG
-                index = self.decodeInt(index)
-
-            # STRING
-            elif self.data[index] in self.STR_START:
-                print 'string found' # DEBUG
-                index = self.decodeString(index)
-
-            # LIST
-            # elif data[index] == self.LIST_START:
-            #     print 'list found' # DEBUG
-            #
-            #
-            #     while data[index] != self.END_CHAR:
-
-            # elif d == self.DICT_START:
-            #     print 'dictionary found' # DEBUG
-            #
-            #
-            #     while data[index] != self.END_CHAR:
-
+        while index < (len(self.data) -1):
+            index, new_data = self.decode(index)
+            self.parsed_data.append(new_data)
 
         return self.parsed_data
+
+
+    def decode(self, index):
+        # INT
+        if self.data[index] == self.INT_START:
+            print 'int found' # DEBUG
+            return self.decodeInt(index)
+
+        # STRING
+        elif self.data[index] in self.STR_START:
+            print 'string found' # DEBUG
+            return self.decodeString(index)
+
+        # LIST
+        elif self.data[index] == self.LIST_START:
+            print 'list found' # DEBUG
+            return self.decodeList(index)
+
+
+        # elif d == self.DICT_START:
+        #     print 'dictionary found' # DEBUG
+        #
+        #
+        #     while data[index] != self.END_CHAR:
+        else:
+            return (index + 1)    # DEBUG
+
 
 
 
     def decodeInt(self, index):
         """
-        index: the index of 'i'
+        index: the index of INT_START
 
-        returns the index after 'e'
+        returns the index after END_CHAR, new_int
         """
-        print 'decodeInt:' # DEBUG
+        print 'decodeInt():', # DEBUG
+        print index # DEBUG
 
         int_start = index+1
 
@@ -82,22 +88,24 @@ class BTParser():
 
         new_int = self.data[int_start:int_end]
 
-        self.parsed_data[index] = new_int
-
         print 'new_int', # DEBUG
         print new_int   # DEBUG
+        print 'return_index',    # DEBUG
+        print (index + 1) # DEBUG
+        print 'exit_decodeInt()'    #DBUG
 
-        return (index + 1)
+        return (index + 1), new_int
 
 
     def decodeString(self, index):
         """
         index: the index of the first STR_START
 
-        return the index after the last string char
+        returns the index after the last string char, new_str
         """
 
-        print 'decodeString:' # DEBUG
+        print 'decodeString():', # DEBUG
+        print index # DEBUG
 
         length_in_str = ''
         new_str = ''
@@ -109,23 +117,46 @@ class BTParser():
         str_length = int(length_in_str)
 
         str_key = index
+        index += 1
 
         while index <= (str_key + str_length):
             new_str += self.data[index]
             index += 1
 
-        self.parsed_data[index] = new_str
-
         print 'new_str', # DEBUG
         print new_str   # DEBUG
+        print 'return_index', # DEBUG
+        print index # DEBUG
+        print 'exit_decodeString()' # DEBUG
 
-        return index
+        return index, new_str
 
     def decodeList(self, index):
         """
+        index: the index of LIST_START
 
+        returns the index after END_CHAR, new_list
         """
-        return True
+
+        print 'decodeList():', # DEBUG
+        print index # DEBUG
+
+        new_list = []
+
+        index += 1
+
+        while self.data[index] != self.END_CHAR:
+
+            index, new_item = self.decode(index)
+            new_list.append(new_item)
+
+        print 'new_list', # DEBUG
+        print new_list  # DEBUG
+        print 'return_index', # DEBUG
+        print index # DEBUG
+        print 'exit_decodeList()'   # DEBUG
+
+        return index, new_list
 
     def decodeDict(self, index):
         """

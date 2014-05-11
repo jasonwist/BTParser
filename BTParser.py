@@ -1,7 +1,7 @@
 import string # needed for finding numbers in the string
 
 
-class BTParser(torrent):
+class BTParser():
     """
 
     """
@@ -11,12 +11,10 @@ class BTParser(torrent):
     LIST_START = 'l'
     STR_START = string.digits   # So I can compare
     END_CHAR = 'e'
-    LENGTH_KEY = ':'
+    STR_LENGTH_KEY = ':'
 
 
-
-
-    def __int__(self, torrent):
+    def __init__(self, torrent):
         """
 
         """
@@ -31,25 +29,23 @@ class BTParser(torrent):
 
         """
 
-        data = self.torrent_data
+        self.data = self.torrent_data
 
-        parsed_data = {}
+        self.parsed_data = {}
 
         index = 0
 
-        while index in range(len(data)):
+        while index in range(len(self.data)):
 
             # INT
-            if data[index] == self.INT_START:
+            if self.data[index] == self.INT_START:
                 print 'int found' # DEBUG
-
-                self.decodeInt(index)
+                index = self.decodeInt(index)
 
             # STRING
-            elif data[index] in self.STR_START:
+            elif self.data[index] in self.STR_START:
                 print 'string found' # DEBUG
-
-                self.decodeString(index)
+                index = self.decodeString(index)
 
             # LIST
             # elif data[index] == self.LIST_START:
@@ -65,50 +61,65 @@ class BTParser(torrent):
             #     while data[index] != self.END_CHAR:
 
 
-
-
-
-
-            index += 1
-
-        return parsed_data
+        return self.parsed_data
 
 
 
     def decodeInt(self, index):
         """
+        index: the index of 'i'
 
+        returns the index after 'e'
         """
+        print 'decodeInt:' # DEBUG
+
         int_start = index+1
 
-        while data[index] != self.END_CHAR:
+        while self.data[index] != self.END_CHAR:
             index += 1
 
         int_end = index
 
-        new_int = data[int_start:int_end]
+        new_int = self.data[int_start:int_end]
 
-        decoded_data.append(dict(i=new_int))
+        self.parsed_data[index] = new_int
+
+        print 'new_int', # DEBUG
+        print new_int   # DEBUG
+
+        return (index + 1)
 
 
     def decodeString(self, index):
         """
+        index: the index of the first STR_START
 
+        return the index after the last string char
         """
+
+        print 'decodeString:' # DEBUG
+
         length_in_str = ''
         new_str = ''
 
-        while data[index] != LENGTH_KEY:
-            length_in_str += data[index]
+        while (self.data[index] != self.STR_LENGTH_KEY) and (self.data[index] in self.STR_START):
+            length_in_str += self.data[index]
             index += 1
 
         str_length = int(length_in_str)
 
-        index += 1
+        str_key = index
 
-        while index <= index + str_length:
-            new_str += data[index]
+        while index <= (str_key + str_length):
+            new_str += self.data[index]
             index += 1
+
+        self.parsed_data[index] = new_str
+
+        print 'new_str', # DEBUG
+        print new_str   # DEBUG
+
+        return index
 
     def decodeList(self, index):
         """
@@ -132,6 +143,6 @@ if __name__ == '__main__':
 
     parsed_data = parser.parseTorrent()
 
-    print 'Parsed Data:',
-    print parsed_data
+    print 'Parsed Data:',   # DEBUG
+    print parsed_data   # DEBUG
 

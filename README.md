@@ -3,12 +3,12 @@
 
 ### Quest:
 Use Python 2.7 to perform the following task:
-Write a re­usable library to parse BitTorrent files. The library should expose at least the following pieces of information (when available in the file):
+Write a re­usable library to parse BitTorrent files  The library should expose at least the following pieces of information (when available in the file):
 
-* creation date
+* creation date
 * client that created the file
-* the tracker URL
-* the name, length, and checksum of each file described in the torrent
+* the tracker URL
+* the name, length, and checksum of each file described in the torrent
 
 No third­party libraries should be used for this project, only the Python standard library.
 
@@ -28,13 +28,15 @@ https://github.com/mohanraj-r/torrentparse
 - I assumed this was another person interviewing for the same job so I didn't want to be influenced by it
 
 http://effbot.org/zone/bencode.htm
+
 -I relied on this for the bulk of my code. That's where I got 'raise ValueError' from for if the value at the index doesn't
 match str,int,list,dict
 -The regex seems like a sweet idea but I was too far in and didn't want to just rip the regex the person had wrote
 
 https://wiki.theory.org/Decoding_bencoded_data_with_python
+
 - I saw this when I was first researching.
-- - Making it a list, reversing it and just popping looked neat but didn't want to copy it
+- Making it a list, reversing it and just popping looked neat but didn't want to copy it
 
 
 ### Things that could be better

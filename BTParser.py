@@ -1,5 +1,6 @@
 import string # needed for finding numbers in the string
 import time # needed for epoch to human time
+import pprint
 
 class BTParser():
     """
@@ -190,6 +191,10 @@ class BTParser():
 
 
     def getCreationDate(self):
+        """
+            Looks for the creation date key:
+            Convert to GMT time from epoch
+        """
         creation_date_epoch = self.parsed_data[0].get('creation date')
 
         if creation_date_epoch != None:
@@ -199,14 +204,24 @@ class BTParser():
 
 
     def getTrackerURL(self):
+        """
+            Looks for the announce key
+        """
         return self.parsed_data[0].get('announce', 'Not available')
 
 
     def getCreationClient(self):
+        """
+            Looks for the created by key
+        """
         return self.parsed_data[0].get('created by', 'Not available')
 
 
     def getFiles(self):
+        """
+            Looks for the info key:
+            Then goes into Single File Mode or Multiple File Mode
+        """
         info = self.parsed_data[0].get('info')
 
         if info != None:
@@ -222,20 +237,58 @@ class BTParser():
             return 'Not available'
 
     def singleFileMode(self, info):
-        return
+        """
+            - take in the dict info
+            - look for:
+                    - name
+                    - length
+                    - md5sum
+        """
+        single_file_info = {}
+        single_file_info['name'] = info.get('name', 'Not available')
+        single_file_info['length'] = info.get('length', 'Not available')
+        single_file_info['md5sum'] = info.get('md5sum', 'Not available')
+
+        return single_file_info
 
     def multipleFileMode(self, info):
-        return
+        """
+            - take in the dict info
+            - find the dict files
+            - look for:
+                    - path
+                    - length
+                    - md5sum
+        """
+        list_of_files = []
+
+        files = info.get('files')
+
+        if files:
+            for f in files:
+                new_file = {}
+                new_file['name'] = f.get('path', 'Not available')
+                new_file['length'] = f.get('length', 'Not available')
+                new_file['md5sum'] = f.get('md5sum', 'Not available')
+                list_of_files.append(new_file)
+
+            return list_of_files
+
+        else:
+            return 'Not available'
 
 
 if __name__ == '__main__':
 
-    torrent_data = open("l5.torrent", "r").read()
+    torrent_data = open("girl.torrent", "r").read()
 
     parser = BTParser(torrent_data)
 
     parsed_data = parser.parseTorrent()
 
     print 'Parsed Data:',   # DEBUG
-    print parsed_data   # DEBUG
+    # print parsed_data   # DEBUG
+
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(parsed_data)
 

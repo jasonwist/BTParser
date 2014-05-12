@@ -39,9 +39,9 @@ class BTParser():
             self.parsed_data.append(new_data)
 
         torrent_info['Created on'] = self.getCreationDate()
-        # torrent_info['Torrent Client'] = self.getCreationClient()
+        torrent_info['Torrent Client'] = self.getCreationClient()
         torrent_info['Tracker URL'] = self.getTrackerURL()
-        # torrent_info['Files in Torrent'] = self.getFiles()
+        torrent_info['Files in Torrent'] = self.getFiles()
 
         return torrent_info
 
@@ -190,12 +190,12 @@ class BTParser():
 
 
     def getCreationDate(self):
-        creation_date_epoch = self.parsed_data[0].get('creation date', 'Not available')
+        creation_date_epoch = self.parsed_data[0].get('creation date')
 
-        if creation_date_epoch != 'Not available':
+        if creation_date_epoch != None:
             return time.strftime("%a, %b %d %Y %H:%M:%S", time.gmtime(int(creation_date_epoch))) + ' GMT'
         else:
-            return creation_date_epoch
+            return 'Not available'
 
 
     def getTrackerURL(self):
@@ -203,11 +203,29 @@ class BTParser():
 
 
     def getCreationClient(self):
-        return
+        return self.parsed_data[0].get('created by', 'Not available')
+
 
     def getFiles(self):
+        info = self.parsed_data[0].get('info')
+
+        if info != None:
+            files = info.get('files')
+
+            if files == None:
+                return self.singleFileMode(info)
+
+            else:
+                return self.multipleFileMode(info)
+
+        else:
+            return 'Not available'
+
+    def singleFileMode(self, info):
         return
 
+    def multipleFileMode(self, info):
+        return
 
 
 if __name__ == '__main__':

@@ -25,7 +25,7 @@ http://en.wikipedia.org/wiki/Bencode
 https://github.com/mohanraj-r/torrentparse
 - I found this early on when I was looking at similar projects. I skimmed it when I was about halfway through and feeling stuck.
 - I borrowed the idea of using string.digits for an easy check if it was a number to determine the start of a string
-- I assumed this was another person interviewing for the same job so I didn't want to be influenced by it
+- I assumed this was another person interviewing for the same job so I didn't look at it so I wouldn't be influnced
 
 http://effbot.org/zone/bencode.htm
 - I relied on this for the bulk of my code. That's where I got 'raise ValueError' from for if the value at the index doesn't

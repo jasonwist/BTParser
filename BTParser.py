@@ -1,6 +1,6 @@
 import string # needed for finding numbers in the string
 import time # needed for epoch to human time
-import pprint
+
 
 class BTParser():
     """
@@ -267,7 +267,13 @@ class BTParser():
         if files:
             for f in files:
                 new_file = {}
-                new_file['name'] = f.get('path', 'Not available')
+                path = f.get('path')
+
+                if path:
+                    new_file['name'] = path.pop() # The last string
+                else:
+                    new_file['name'] = 'Not available'
+
                 new_file['length'] = f.get('length', 'Not available')
                 new_file['md5sum'] = f.get('md5sum', 'Not available')
                 list_of_files.append(new_file)
@@ -280,15 +286,12 @@ class BTParser():
 
 if __name__ == '__main__':
 
-    torrent_data = open("girl.torrent", "r").read()
+    torrent_data = open("min.torrent", "r").read()
 
     parser = BTParser(torrent_data)
 
     parsed_data = parser.parseTorrent()
 
     print 'Parsed Data:',   # DEBUG
-    # print parsed_data   # DEBUG
-
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(parsed_data)
+    print parsed_data   # DEBUG
 

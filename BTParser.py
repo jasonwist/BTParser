@@ -3,35 +3,36 @@ import time # needed for epoch to human time
 
 
 class BTParser():
-    """
-
-    """
 
     DICT_START = 'd'
     INT_START = 'i'
     LIST_START = 'l'
-    STR_START = string.digits   # So I can compare
+    STR_START = string.digits   # So I can compare the char against 0-9
     END_CHAR = 'e'
     STR_LENGTH_KEY = ':'
 
 
-    def __init__(self, torrent):
+    def __init__(self):
+        """
+        """
+        pass
+
+
+    def parseTorrent(self, torrent_name):
+        """
+        Parses the given torrent file and returns a dictionary of the wanted information
+        If the required information cannot be found the value will be 'Not available'
+
+        I did this for basic troubleshooting, in production I would have just not had the key value pair
+        at all or set it to a value indicating it didn't exist in the torrent file
+
+        :param torrent_name: The name of the target file
+        :return torrent_info: A dictionary of the required information
         """
 
-        """
-
-        self.torrent_data = torrent
-
-
-    def parseTorrent(self):
-        """
-
-        """
-
-        self.data = self.torrent_data
+        self.data = open(torrent_name, "r").read()
 
         self.parsed_data = []
-        torrent_info = {}
 
         index = 0
 
@@ -39,15 +40,21 @@ class BTParser():
             index, new_data = self.decode(index)
             self.parsed_data.append(new_data)
 
-        torrent_info['Created on'] = self.getCreationDate()
-        torrent_info['Torrent Client'] = self.getCreationClient()
-        torrent_info['Tracker URL'] = self.getTrackerURL()
-        torrent_info['Files in Torrent'] = self.getFiles()
+        torrent_info = self.getTorrentInfo()
 
         return torrent_info
 
 
     def decode(self, index):
+        """
+        Uses the index given to determine what type of value will be decoded
+
+        Ints and Strings are the base cases, Lists and Dicts keep calling decode()
+
+        :param index: The index of the first char of the data type
+        :return (index, new_data): The char right after data type's value, A new decoded data
+        """
+
         # INT
         if self.data[index] == self.INT_START:
             # print 'int found' # DEBUG
@@ -69,14 +76,15 @@ class BTParser():
             return self.decodeDict(index)
 
         else:
-            raise ValueError  # DEBUG NEED TO FIX
+            raise ValueError  # OMGWTFBBQ
 
 
     def decodeInt(self, index):
         """
-        index: the index of INT_START
+        Given the start of the integer, return the decoded integer and the position of the start of the next data type
 
-        returns the index after END_CHAR, new_int
+        :param index: The index of the start of the data type (i)
+        :return index, new_int: The index after 'e', The decoded int
         """
         # print 'decodeInt():', # DEBUG
         # print index # DEBUG
@@ -101,9 +109,10 @@ class BTParser():
 
     def decodeString(self, index):
         """
-        index: the index of the first STR_START
+        Given the start of the string, return the decoded string and the position of the start of the next data type
 
-        returns the index after the last string char, new_str
+        :param index: The index of the start of the data type (0-9)
+        :return: index, new_str: The index after the last char in the string, The decoded string
         """
 
         # print 'decodeString():', # DEBUG
@@ -136,9 +145,14 @@ class BTParser():
 
     def decodeList(self, index):
         """
-        index: the index of LIST_START
+        Given the start of the list, return the decoded list and the position of the start of the next data type
 
-        returns the index after END_CHAR, new_list
+        Every time a new list item is discovered call decode() give it the starting index and add it to the list
+        A new (incremented) index is one of the products of decode() so it will automatically point to the next
+        list item or the end of list char 'e'
+
+        :param index: The index of the start of the data type (l)
+        :return: index, new_str: The index after 'e', The decoded list
         """
 
         # print 'decodeList():', # DEBUG
@@ -164,9 +178,14 @@ class BTParser():
 
     def decodeDict(self, index):
         """
-        index: the index of DICT_START
+        Given the start of the dict, return the decoded dict and the position of the start of the next data type
 
-        returns the index after END_CHAR, new_dict
+        Every time a new list item is discovered call decode() twice to get the key-value pair
+        The key will always be first and the value will always be after the key
+        Add the key-value pair to the dictionary
+
+        :param index: The index of the start of the data type (d)
+        :return: index, new_str: The index after 'e', The decoded dict
         """
         # print 'decodeDict():', # DEBUG
         # print index # DEBUG
@@ -179,6 +198,7 @@ class BTParser():
 
             index, new_key = self.decode(index)
             index, new_value = self.decode(index)
+
             new_dict[new_key] = new_value
 
         # print 'new_dict', # DEBUG
@@ -190,44 +210,66 @@ class BTParser():
         return (index + 1), new_dict
 
 
+    def getTorrentInfo(self):
+        """
+        Parses the wanted information that was decoded from the torrent
+
+        :return torrent_info: A dictionary containing the required information for the project
+        """
+        torrent_info = {}
+
+        torrent_info['Created on'] = self.getCreationDate()
+        torrent_info['Torrent Client'] = self.getCreationClient()
+        torrent_info['Tracker URL'] = self.getTrackerURL()
+        torrent_info['Files in Torrent'] = self.getFiles()
+
+        return torrent_info
+
     def getCreationDate(self):
         """
-            Looks for the creation date key:
-            Convert to GMT time from epoch
+        Locates the creation date of the torrent an converts it from epoch to GMT
+
+        :return creation date: The creation date in GMT
         """
         creation_date_epoch = self.parsed_data[0].get('creation date')
 
         if creation_date_epoch != None:
-            return time.strftime("%a, %b %d %Y %H:%M:%S", time.gmtime(int(creation_date_epoch))) + ' GMT'
+            return time.strftime("%a, %b %d %Y %H:%M:%S", time.gmtime(int(creation_date_epoch)))
         else:
             return 'Not available'
 
 
     def getTrackerURL(self):
         """
-            Looks for the announce key
+        Locates the tracker URL for the torrent
+
+        :return announce: The tracker URL
         """
         return self.parsed_data[0].get('announce', 'Not available')
 
 
     def getCreationClient(self):
         """
-            Looks for the created by key
+        Locates the client that created the torrent
+
+        :return created by: The name of the client
         """
         return self.parsed_data[0].get('created by', 'Not available')
 
 
     def getFiles(self):
         """
-            Looks for the info key:
-            Then goes into Single File Mode or Multiple File Mode
+        Locates the information of the file(s) in the torrent
+        Then goes into Single File Mode or Multiple File Mode
+
+        :return file(s): A dict or list of dicts that contains each files md5checksum, name and length (Bytes)
         """
         info = self.parsed_data[0].get('info')
 
-        if info != None:
+        if info is not None:
             files = info.get('files')
 
-            if files == None:
+            if files is None:
                 return self.singleFileMode(info)
 
             else:
@@ -238,13 +280,14 @@ class BTParser():
 
     def singleFileMode(self, info):
         """
-            - take in the dict info
-            - look for:
-                    - name
-                    - length
-                    - md5sum
+        Gets the required info of the file
+
+        :param info: A dict containing the required information
+        :return file_info: Return a dict of name, length (Bytes) and md5sum of the file
         """
+
         single_file_info = {}
+
         single_file_info['name'] = info.get('name', 'Not available')
         single_file_info['length'] = info.get('length', 'Not available')
         single_file_info['md5sum'] = info.get('md5sum', 'Not available')
@@ -253,12 +296,10 @@ class BTParser():
 
     def multipleFileMode(self, info):
         """
-            - take in the dict info
-            - find the dict files
-            - look for:
-                    - path
-                    - length
-                    - md5sum
+        Gets the required info of the files
+
+        :param info: A list containing dictionaries of the required information
+        :return file_info: Return a list of dictionaries that contain the name, length (Bytes) and md5sum of the files
         """
         list_of_files = []
 
@@ -266,11 +307,12 @@ class BTParser():
 
         if files:
             for f in files:
+
                 new_file = {}
                 path = f.get('path')
 
                 if path:
-                    new_file['name'] = path.pop() # The last string
+                    new_file['name'] = path.pop() # The last string in the path list is the file name
                 else:
                     new_file['name'] = 'Not available'
 
@@ -282,16 +324,3 @@ class BTParser():
 
         else:
             return 'Not available'
-
-
-if __name__ == '__main__':
-
-    torrent_data = open("min.torrent", "r").read()
-
-    parser = BTParser(torrent_data)
-
-    parsed_data = parser.parseTorrent()
-
-    print 'Parsed Data:',   # DEBUG
-    print parsed_data   # DEBUG
-

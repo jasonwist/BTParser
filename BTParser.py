@@ -18,7 +18,7 @@ class BTParser():
         pass
 
 
-    def parseTorrent(self, torrent_name):
+    def parse_torrent(self, torrent_name):
         """
         Parses the given torrent file and returns a dictionary of the wanted information
         If the required information cannot be found the value will be 'Not available'
@@ -40,7 +40,7 @@ class BTParser():
             index, new_data = self.decode(index)
             self.parsed_data.append(new_data)
 
-        torrent_info = self.getTorrentInfo()
+        torrent_info = self.torrent_info()
 
         return torrent_info
 
@@ -58,35 +58,35 @@ class BTParser():
         # INT
         if self.data[index] == self.INT_START:
             # print 'int found' # DEBUG
-            return self.decodeInt(index)
+            return self.decode_int(index)
 
         # STRING
         elif self.data[index] in self.STR_START:
             # print 'string found' # DEBUG
-            return self.decodeString(index)
+            return self.decode_str(index)
 
         # LIST
         elif self.data[index] == self.LIST_START:
             # print 'list found' # DEBUG
-            return self.decodeList(index)
+            return self.decode_list(index)
 
         # DICT
         elif self.data[index] == self.DICT_START:
             # print 'dictionary found' # DEBUG
-            return self.decodeDict(index)
+            return self.decode_dict(index)
 
         else:
             raise ValueError  # OMGWTFBBQ
 
 
-    def decodeInt(self, index):
+    def decode_int(self, index):
         """
         Given the start of the integer, return the decoded integer and the position of the start of the next data type
 
         :param index: The index of the start of the data type (i)
         :return index, new_int: The index after 'e', The decoded int
         """
-        # print 'decodeInt():', # DEBUG
+        # print 'decode_int():', # DEBUG
         # print index # DEBUG
 
         int_start = index+1
@@ -102,12 +102,12 @@ class BTParser():
         # print new_int   # DEBUG
         # print 'return_index',    # DEBUG
         # print (index + 1) # DEBUG
-        # print 'exit_decodeInt()'    #DBUG
+        # print 'exit_decode_int()'    #DBUG
 
         return (index + 1), new_int
 
 
-    def decodeString(self, index):
+    def decode_str(self, index):
         """
         Given the start of the string, return the decoded string and the position of the start of the next data type
 
@@ -115,7 +115,7 @@ class BTParser():
         :return: index, new_str: The index after the last char in the string, The decoded string
         """
 
-        # print 'decodeString():', # DEBUG
+        # print 'decode_str():', # DEBUG
         # print index # DEBUG
 
         length_in_str = ''
@@ -138,12 +138,12 @@ class BTParser():
         # print new_str   # DEBUG
         # print 'return_index', # DEBUG
         # print index # DEBUG
-        # print 'exit_decodeString()' # DEBUG
+        # print 'exit_decode_str()' # DEBUG
 
         return index, new_str
 
 
-    def decodeList(self, index):
+    def decode_list(self, index):
         """
         Given the start of the list, return the decoded list and the position of the start of the next data type
 
@@ -155,7 +155,7 @@ class BTParser():
         :return: index, new_str: The index after 'e', The decoded list
         """
 
-        # print 'decodeList():', # DEBUG
+        # print 'decode_list():', # DEBUG
         # print index # DEBUG
 
         new_list = []
@@ -171,12 +171,12 @@ class BTParser():
         # print new_list  # DEBUG
         # print 'return_index', # DEBUG
         # print (index + 1) # DEBUG
-        # print 'exit_decodeList()'   # DEBUG
+        # print 'exit_decode_list()'   # DEBUG
 
         return (index + 1), new_list
 
 
-    def decodeDict(self, index):
+    def decode_dict(self, index):
         """
         Given the start of the dict, return the decoded dict and the position of the start of the next data type
 
@@ -187,7 +187,7 @@ class BTParser():
         :param index: The index of the start of the data type (d)
         :return: index, new_str: The index after 'e', The decoded dict
         """
-        # print 'decodeDict():', # DEBUG
+        # print 'decode_dict():', # DEBUG
         # print index # DEBUG
 
         new_dict = {}
@@ -205,12 +205,12 @@ class BTParser():
         # print new_dict  # DEBUG
         # print 'return_index', # DEBUG
         # print (index + 1) # DEBUG
-        # print 'exit_decodeDict()'   # DEBUG
+        # print 'exit_decode_dict()'   # DEBUG
 
         return (index + 1), new_dict
 
 
-    def getTorrentInfo(self):
+    def torrent_info(self):
         """
         Parses the wanted information that was decoded from the torrent
 
@@ -218,14 +218,14 @@ class BTParser():
         """
         torrent_info = {}
 
-        torrent_info['Created on'] = self.getCreationDate()
-        torrent_info['Torrent Client'] = self.getCreationClient()
-        torrent_info['Tracker URL'] = self.getTrackerURL()
-        torrent_info['Files in Torrent'] = self.getFiles()
+        torrent_info['Created on'] = self.creation_date()
+        torrent_info['Torrent Client'] = self.creation_client()
+        torrent_info['Tracker URL'] = self.tracker_url()
+        torrent_info['Files in Torrent'] = self.files()
 
         return torrent_info
 
-    def getCreationDate(self):
+    def creation_date(self):
         """
         Locates the creation date of the torrent an converts it from epoch to GMT
 
@@ -239,7 +239,7 @@ class BTParser():
             return 'Not available'
 
 
-    def getTrackerURL(self):
+    def tracker_url(self):
         """
         Locates the tracker URL for the torrent
 
@@ -248,7 +248,7 @@ class BTParser():
         return self.parsed_data[0].get('announce', 'Not available')
 
 
-    def getCreationClient(self):
+    def creation_client(self):
         """
         Locates the client that created the torrent
 
@@ -257,7 +257,7 @@ class BTParser():
         return self.parsed_data[0].get('created by', 'Not available')
 
 
-    def getFiles(self):
+    def files(self):
         """
         Locates the information of the file(s) in the torrent
         Then goes into Single File Mode or Multiple File Mode
@@ -270,15 +270,15 @@ class BTParser():
             files = info.get('files')
 
             if files is None:
-                return self.singleFileMode(info)
+                return self.single_file_mode(info)
 
             else:
-                return self.multipleFileMode(info)
+                return self.multiple_file_mode(info)
 
         else:
             return 'Not available'
 
-    def singleFileMode(self, info):
+    def single_file_mode(self, info):
         """
         Gets the required info of the file
 
@@ -294,7 +294,7 @@ class BTParser():
 
         return single_file_info
 
-    def multipleFileMode(self, info):
+    def multiple_file_mode(self, info):
         """
         Gets the required info of the files
 

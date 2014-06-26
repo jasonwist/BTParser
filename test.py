@@ -1,4 +1,4 @@
-import BTParser
+from BTParser import *
 
 
 """
@@ -6,9 +6,9 @@ import BTParser
 """
 
 
-parser = BTParser.BTParser()
+parser = BTParser()
 
-parsed_data = parser.parseTorrent('pingos.torrent')
+parsed_data = parser.parse_torrent('pingos.torrent')
 
 print 'Parsed Data:',   # DEBUG
 print parsed_data   # DEBUG
